@@ -1,0 +1,38 @@
+name: Build Unity Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ scout/crer-le-mvp-unity-an-e1fe79b0 ]
+    paths:
+      - 'unity/AnimationCraft/**'
+      - '.github/workflows/unity-windows.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: unity/AnimationCraft/Library
+          key: ${{ runner.os }}-Library-${{ hashFiles('unity/AnimationCraft/Assets/**', 'unity/AnimationCraft/Packages/manifest.json', 'unity/AnimationCraft/ProjectSettings/**') }}
+          restore-keys: |
+            ${{ runner.os }}-Library-
+      - name: Setup Unity
+        uses: game-ci/unity-builder@v4
+        with:
+          projectPath: unity/AnimationCraft
+          targetPlatform: StandaloneWindows64
+          allowDirtyBuild: true
+          versioning: Semantic
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimationCraft-Windows
+          path: build/StandaloneWindows64/**
