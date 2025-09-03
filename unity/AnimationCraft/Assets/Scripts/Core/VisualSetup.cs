@@ -8,7 +8,23 @@ namespace AnimationCraft.Core
     {
         void Start()
         {
+            EnsureSkybox();
             EnsureGlobalVolume();
+        }
+
+        void EnsureSkybox()
+        {
+            if (RenderSettings.skybox != null) return;
+            var tex = Resources.Load<Texture2D>("HDRIs/kiara_1_dawn_4k");
+            if (!tex) return;
+            var mat = new Material(Shader.Find("Skybox/Panoramic"));
+            if (mat.HasProperty("_Tex")) mat.SetTexture("_Tex", tex);
+            else mat.SetTexture("_MainTex", tex);
+            mat.SetFloat("_Exposure", 1.1f);
+            mat.SetFloat("_Rotation", 0f);
+            RenderSettings.skybox = mat;
+            DynamicGI.UpdateEnvironment();
+            RenderSettings.ambientMode = AmbientMode.Skybox;
         }
 
         void EnsureGlobalVolume()
@@ -27,8 +43,8 @@ namespace AnimationCraft.Core
             if (!bloom)
             {
                 bloom = profile.Add<Bloom>(true);
-                bloom.intensity.value = 0.2f;
-                bloom.scatter.value = 0.6f;
+                bloom.intensity.value = 0.35f;
+                bloom.scatter.value = 0.7f;
                 bloom.threshold.value = 0.9f;
             }
 
@@ -36,24 +52,24 @@ namespace AnimationCraft.Core
             if (!color)
             {
                 color = profile.Add<ColorAdjustments>(true);
-                color.postExposure.value = 0.0f;
-                color.contrast.value = 10f;
-                color.saturation.value = 10f;
+                color.postExposure.value = 0.15f;
+                color.contrast.value = 12f;
+                color.saturation.value = 12f;
             }
 
             profile.TryGet<Vignette>(out var vignette);
             if (!vignette)
             {
                 vignette = profile.Add<Vignette>(true);
-                vignette.intensity.value = 0.18f;
+                vignette.intensity.value = 0.2f;
             }
 
             profile.TryGet<FilmGrain>(out var grain);
             if (!grain)
             {
                 grain = profile.Add<FilmGrain>(true);
-                grain.intensity.value = 0.1f;
-                grain.type.value = FilmGrainLookup.Thin1;
+                grain.intensity.value = 0.12f;
+                grain.type.value = FilmGrainLookup.Medium1;
             }
 
             profile.TryGet<DepthOfField>(out var dof);
@@ -61,11 +77,9 @@ namespace AnimationCraft.Core
             {
                 dof = profile.Add<DepthOfField>(true);
                 dof.mode.value = DepthOfFieldMode.Bokeh;
-                dof.gaussianStart.value = 4f;
-                dof.gaussianEnd.value = 20f;
-                dof.focusDistance.value = 10f;
-                dof.focalLength.value = 50f;
-                dof.aperture.value = 16f;
+                dof.focusDistance.value = 12f;
+                dof.focalLength.value = 55f;
+                dof.aperture.value = 12f;
             }
         }
     }

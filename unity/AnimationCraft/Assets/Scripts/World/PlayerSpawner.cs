@@ -34,6 +34,7 @@ namespace AnimationCraft.World
             cam.clearFlags = CameraClearFlags.Skybox;
             var cine = camGo.AddComponent<CinematicCamera>();
             cine.target = anchor.transform;
+            camGo.AddComponent<ScreenShake>();
 
             go.AddComponent<PlayerControllerTPS>();
             go.AddComponent<AnimationCraft.Core.VisualSetup>();
