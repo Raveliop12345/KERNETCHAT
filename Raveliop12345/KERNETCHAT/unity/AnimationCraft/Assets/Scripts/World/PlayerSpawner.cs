@@ -1,4 +1,5 @@
 using AnimationCraft.Inputs;
+using AnimationCraft.CameraRig;
 using UnityEngine;
 
 namespace AnimationCraft.World
@@ -22,14 +23,21 @@ namespace AnimationCraft.World
         GameObject CreateDefaultPlayer()
         {
             var go = new GameObject("Player");
+
+            var anchor = new GameObject("CameraAnchor");
+            anchor.transform.SetParent(go.transform);
+            anchor.transform.localPosition = new Vector3(0, 1.6f, -4f);
+            anchor.transform.localRotation = Quaternion.identity;
+
             var camGo = new GameObject("Camera");
-            camGo.transform.SetParent(go.transform);
-            camGo.transform.localPosition = new Vector3(0, 1.6f, -4f);
-            camGo.transform.localRotation = Quaternion.identity;
             var cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.Skybox;
+            var cine = camGo.AddComponent<CinematicCamera>();
+            cine.target = anchor.transform;
 
             go.AddComponent<PlayerControllerTPS>();
+            go.AddComponent<AnimationCraft.Core.VisualSetup>();
+            var fx = new GameObject("FX"); fx.AddComponent<AnimationCraft.FX.BlockFXManager>();
             return go;
         }
     }

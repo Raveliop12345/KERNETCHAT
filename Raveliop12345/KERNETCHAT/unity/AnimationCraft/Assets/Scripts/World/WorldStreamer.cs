@@ -45,7 +45,8 @@ namespace AnimationCraft.World
             }
             if (!chunkMaterial)
             {
-                var shader = Shader.Find("AnimationCraft/UnlitVertexColor");
+                var shader = Shader.Find("AnimationCraft/DitherLitVertexColor");
+                if (!shader) shader = Shader.Find("AnimationCraft/UnlitVertexColor");
                 chunkMaterial = new Material(shader);
             }
             var parent = new GameObject("Chunks").transform;
@@ -211,6 +212,15 @@ namespace AnimationCraft.World
             else if (lz == Constants.ChunkSizeZ - 1) RemeshNeighbor(new ChunkCoord(cc.x, cc.y, cc.z + 1));
             if (ly == 0) RemeshNeighbor(new ChunkCoord(cc.x, cc.y - 1, cc.z));
             else if (ly == Constants.ChunkSizeY - 1) RemeshNeighbor(new ChunkCoord(cc.x, cc.y + 1, cc.z));
+        }
+
+        public void SetViewRadius(int r)
+        {
+            r = Mathf.Clamp(r, 1, 12);
+            if (r == viewRadius) return;
+            viewRadius = r;
+            BuildRingOrder(viewRadius);
+            UpdateVisibleChunks();
         }
 
         ChunkCoord WorldToChunk(Vector3Int w, out int lx, out int ly, out int lz)

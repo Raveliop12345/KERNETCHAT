@@ -29,6 +29,7 @@ namespace AnimationCraft.Chunks
             var mr = obj.AddComponent<MeshRenderer>();
             mr.sharedMaterial = material;
             obj.AddComponent<MeshCollider>();
+            obj.AddComponent<ChunkFader>();
             return obj;
         }
 
