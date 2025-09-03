@@ -1,0 +1,34 @@
+{
+  "name": "InputActions",
+  "maps": [
+    {
+      "name": "Player",
+      "actions": [
+        { "name": "Move", "type": "Value", "expectedControlType": "Vector2" },
+        { "name": "Look", "type": "Value", "expectedControlType": "Vector2" },
+        { "name": "Up", "type": "Button" },
+        { "name": "Down", "type": "Button" },
+        { "name": "Break", "type": "Button" },
+        { "name": "Place", "type": "Button" },
+        { "name": "CycleBlock", "type": "Value", "expectedControlType": "Axis" },
+        { "name": "ToggleDebug", "type": "Button" }
+      ],
+      "bindings": [
+        { "path": "2DVector", "action": "Move", "isComposite": true },
+        { "path": "<Keyboard>/w", "action": "Move", "isPartOfComposite": true, "name": "up" },
+        { "path": "<Keyboard>/s", "action": "Move", "isPartOfComposite": true, "name": "down" },
+        { "path": "<Keyboard>/a", "action": "Move", "isPartOfComposite": true, "name": "left" },
+        { "path": "<Keyboard>/d", "action": "Move", "isPartOfComposite": true, "name": "right" },
+
+        { "path": "<Mouse>/delta", "action": "Look" },
+        { "path": "<Keyboard>/space", "action": "Up" },
+        { "path": "<Keyboard>/ctrl", "action": "Down" },
+        { "path": "<Mouse>/leftButton", "action": "Break" },
+        { "path": "<Mouse>/rightButton", "action": "Place" },
+        { "path": "<Mouse>/scroll/y", "action": "CycleBlock" },
+        { "path": "<Keyboard>/f3", "action": "ToggleDebug" }
+      ]
+    }
+  ],
+  "controlSchemes": []
+}
