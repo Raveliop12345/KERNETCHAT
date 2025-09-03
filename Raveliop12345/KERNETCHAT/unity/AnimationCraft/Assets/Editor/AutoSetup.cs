@@ -2,7 +2,11 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+#if UNITY_RENDER_PIPELINE_UNIVERSAL
+using UnityEngine.Rendering.Universal;
+#endif
 
 namespace AnimationCraft.EditorTools
 {
@@ -18,6 +22,7 @@ namespace AnimationCraft.EditorTools
         {
             EditorApplication.update -= RunOnce;
             EnsureProjectSettings();
+            EnsurePipeline();
             EnsureScenes();
             EnsureMaterials();
         }
@@ -32,6 +37,19 @@ namespace AnimationCraft.EditorTools
                 PlayerSettings.activeInputHandler = PlayerSettings.ActiveInputHandling.InputSystemPackage;
             }
             catch { }
+        }
+
+        static void EnsurePipeline()
+        {
+#if UNITY_RENDER_PIPELINE_UNIVERSAL
+            if (GraphicsSettings.defaultRenderPipeline == null)
+            {
+                var asset = ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
+                AssetDatabase.CreateAsset(asset, "Assets/Settings/URPAsset.asset");
+                GraphicsSettings.defaultRenderPipeline = asset;
+                QualitySettings.renderPipeline = asset;
+            }
+#endif
         }
 
         static void EnsureScenes()
