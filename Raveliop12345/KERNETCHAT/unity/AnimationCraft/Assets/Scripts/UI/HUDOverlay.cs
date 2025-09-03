@@ -13,10 +13,12 @@ namespace AnimationCraft.UI
         int frames;
         float timer;
         WorldStreamer world;
+        int viewSlider;
 
         void Start()
         {
             world = FindObjectOfType<WorldStreamer>();
+            viewSlider = WorldSession.ViewRadius;
         }
 
         void Update()
@@ -37,8 +39,19 @@ namespace AnimationCraft.UI
         void OnGUI()
         {
             GUIStyle s = new GUIStyle(GUI.skin.label) { fontSize = 14, normal = { textColor = Color.white } };
-            GUILayout.BeginArea(new Rect(10, 10, 400, 200));
-            GUILayout.Label($"Block: scroll to cycle | Seed: {WorldSession.Seed} | View: {WorldSession.ViewRadius}", s);
+            GUILayout.BeginArea(new Rect(10, 10, 420, 240));
+            GUILayout.Label($"Block: scroll to cycle | Seed: {WorldSession.Seed}", s);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("View radius:", GUILayout.Width(90));
+            string val = GUILayout.TextField(viewSlider.ToString(), GUILayout.Width(40));
+            if (int.TryParse(val, out int parsed)) viewSlider = Mathf.Clamp(parsed, 1, 12);
+            if (GUILayout.Button("Apply", GUILayout.Width(60)) && world)
+            {
+                world.SetViewRadius(viewSlider);
+                WorldSession.ViewRadius = viewSlider;
+            }
+            GUILayout.EndHorizontal();
+
             if (showDebug && world)
             {
                 GUILayout.Label($"FPS: {fps:F1}", s);
