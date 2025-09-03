@@ -5,10 +5,8 @@ using AnimationCraft.Generation;
 using AnimationCraft.Meshing;
 using AnimationCraft.Save;
 using AnimationCraft.Voxel;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace AnimationCraft.World
@@ -29,7 +27,6 @@ namespace AnimationCraft.World
         SaveSystem save;
 
         Vector3 lastPlayerPos;
-        ChunkCoord lastPlayerChunk;
         readonly List<ChunkCoord> ringOrder = new List<ChunkCoord>();
 
         struct MeshTask
@@ -91,7 +88,6 @@ namespace AnimationCraft.World
                 UpdateVisibleChunks();
             }
 
-            int completed = 0;
             for (int i = tasks.Count - 1; i >= 0; i--)
             {
                 var t = tasks[i];
@@ -101,7 +97,6 @@ namespace AnimationCraft.World
                     MeshApplier.Apply(t.chunk.go, t.meshData);
                     t.meshData.Dispose();
                     tasks.RemoveAt(i);
-                    completed++;
                 }
             }
         }
@@ -201,6 +196,37 @@ namespace AnimationCraft.World
             };
             var handle = job.Schedule();
             tasks.Add(new MeshTask { chunk = chunk, handle = handle, meshData = md });
+        }
+
+        public void SetBlock(Vector3Int worldPos, byte id)
+        {
+            var cc = WorldToChunk(worldPos, out int lx, out int ly, out int lz);
+            if (!active.TryGetValue(cc, out var chunk)) return;
+            chunk.Set(lx, ly, lz, id);
+            if (enableSave) save.SaveChunk(cc, chunk.voxels);
+            EnqueueMeshing(chunk);
+            if (lx == 0) RemeshNeighbor(new ChunkCoord(cc.x - 1, cc.y, cc.z));
+            else if (lx == Constants.ChunkSizeX - 1) RemeshNeighbor(new ChunkCoord(cc.x + 1, cc.y, cc.z));
+            if (lz == 0) RemeshNeighbor(new ChunkCoord(cc.x, cc.y, cc.z - 1));
+            else if (lz == Constants.ChunkSizeZ - 1) RemeshNeighbor(new ChunkCoord(cc.x, cc.y, cc.z + 1));
+            if (ly == 0) RemeshNeighbor(new ChunkCoord(cc.x, cc.y - 1, cc.z));
+            else if (ly == Constants.ChunkSizeY - 1) RemeshNeighbor(new ChunkCoord(cc.x, cc.y + 1, cc.z));
+        }
+
+        ChunkCoord WorldToChunk(Vector3Int w, out int lx, out int ly, out int lz)
+        {
+            int cx = Mathf.FloorToInt((float)w.x / Constants.ChunkSizeX);
+            int cy = Mathf.FloorToInt((float)w.y / Constants.ChunkSizeY);
+            int cz = Mathf.FloorToInt((float)w.z / Constants.ChunkSizeZ);
+            lx = w.x - cx * Constants.ChunkSizeX; if (lx < 0) lx += Constants.ChunkSizeX;
+            ly = w.y - cy * Constants.ChunkSizeY; if (ly < 0) ly += Constants.ChunkSizeY;
+            lz = w.z - cz * Constants.ChunkSizeZ; if (lz < 0) lz += Constants.ChunkSizeZ;
+            return new ChunkCoord(cx, cy, cz);
+        }
+
+        void RemeshNeighbor(ChunkCoord cc)
+        {
+            if (active.TryGetValue(cc, out var n)) EnqueueMeshing(n);
         }
 
         public int ActiveChunkCount => active.Count;
